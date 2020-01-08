@@ -1,0 +1,21 @@
+[alias]
+    co = checkout
+    branchname = symbolic-ref --short -q HEAD
+    go = "!f(){ branchname=$(git branchname) && git fetch origin $branchname && git pull origin $branchname && git status; };f"
+    mrg = "!f(){ git fetch origin $1 && git merge origin/$1 && git status; };f"
+    br = "!f(){ git co $1 && git go; };f"
+    po = "!f(){ branchname=$(git branchname) && git fetch origin $branchname || git push --set-upstream origin $branchname && git push origin $branchname && git status; };f"
+
+    storyfromname = "!f(){ echo $(git branchname) | grep -o 'feature/SSS-[0-9]*' | grep -o SSS-[0-9]* | xargs -n 1 echo; }; f"
+    taskname = "!f(){ taskname=$(echo $(git branchname) | grep -m2 -o 'SSS-[0-9]*' | tail -n1 | xargs echo) && echo $taskname; }; f"
+    storyfrombranch = "!f(){ echo $(git storyfromname $(git branchname)); }; f"
+    pr = "!f(){ branchname=$(git branchname) && addr=$(git ls-remote --get-url) && url=${addr/.git/} && git web--browse $url'/merge_requests/new?merge_request%5Bsource_branch%5D='$branchname'&merge_request%5Btarget_branch%5D='$1; };f" 
+    nst = "!f(){ git br master && git co -b feature/SSS-$1/main && git po; };f"
+    ntf = "!f(){ git br feature/$(git storyfrombranch)/main && git co -b feature/$(git storyfrombranch)/SSS-$1; };f"
+    cot = "!f(){ git co feature/$(git storyfrombranch)/SSS-$1; };f"
+    mrgst = "!f(){ git mrg feature/$(git storyfrombranch)/main; };f"
+    prst = "!f(){ git po && git pr feature/$(git storyfrombranch)/main; };f"
+	cmt = "!f(){ branchname=$(git taskname) && git add -A && git commit -am \"[$(git taskname)] $*\"; }; f"
+    jit = "!f(){ git web--browse 'https://jit.ozon.ru/browse/'$(git taskname); }; f"
+
+    bclean = "!f(){ git fetch -p && git branch -vv | grep ': gone]' | grep -v 'release' | grep -v 'hotfix' | awk '{print $1}'| xargs -n 1 git branch -D; };f"
